@@ -1,4 +1,5 @@
-import openai
+import os
+from openai import AzureOpenAI
 import uuid
 from approaches.approach import Approach
 import chat_log.cosmosdb_logging as cosmosdb_logging
@@ -10,7 +11,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.chatgpt_deployment = chatgpt_deployment
         self.gpt_deployment = gpt_deployment
 
-    def run(self, history: list[dict], overrides: dict, sessionConfig: dict, userInfo:dict, header: dict) -> any:
+    def run(self, history: list[dict], overrides: dict, sessionConfig: dict, userInfo:dict, incomingHeaders: dict, defaultHeaders: dict) -> any:
         request_uuid=uuid.uuid4()
         print("requestID:",request_uuid,",history:", history)
         print("requestID:",request_uuid,",override:", overrides)
@@ -23,7 +24,7 @@ class ChatReadRetrieveReadApproach(Approach):
         pastMessages = sessionConfig.get("pastMessages") or 10
         user_name= userInfo.get("username") or "anonymous user_name"
         user_id = userInfo.get("email") or "anonymous user_id"
-        chat_session_id = header.get("Sessionid") or "anonymous-" + str(uuid.uuid4())
+        chat_session_id = incomingHeaders.get("Sessionid") or "anonymous-" + str(uuid.uuid4())
         print("user:", {"name": user_name,"user_id":user_id} ) # For Azure Log Analytics
         print("parameters:", {"Max Response": max_tokens, "Temperature": temperature, "Top P": top_p, "Past message included": pastMessages})
 
@@ -33,27 +34,30 @@ class ChatReadRetrieveReadApproach(Approach):
         system_prompt_template["content"] = promptSystemTemplate
         print("prompt:",[system_prompt_template]+self.get_chat_history_as_text(history, pastMessages)) # For Azure Log Analytics
 
-        completion = openai.ChatCompletion.create(
-            engine=self.chatgpt_deployment,
+        client = AzureOpenAI(default_headers=defaultHeaders, max_retries=0)
+        raw = client.chat.completions.with_raw_response.create(
             messages = [system_prompt_template]+self.get_chat_history_as_text(history, pastMessages),
+            model=os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT"),
             temperature=temperature,
             max_tokens=max_tokens,
             top_p=top_p,
             frequency_penalty=0,
-            presence_penalty=0,
+            presence_penalty=0,                        
             stop=None)
+        completion = raw.parse()
         print("completion: ", completion) # For Azure Log Analytics
+        print("reponse headers: ", raw.headers)
 
         document_definition = { "id": str(uuid.uuid4()),
                                 "chat_session_id": chat_session_id, 
                                 "user": {"name": user_name,"user_id":user_id}, 
-                                'message': {"id":completion.get("id") or "anonymous-id",
+                                'message': {"id":completion.id or "anonymous-id",
                                         "prompt":[system_prompt_template]+self.get_chat_history_as_text(history, pastMessages),
                                         "other_attr":[{"completion": completion}],
                                         "previous_message_id":"previous_message_id"}}
         
         #cosmosdb_logging.insert_chat_log(document_definition) # Store prompt log data into Azure Cosmos DB
-        return {"answer": completion.choices[0].message["content"]}
+        return {"answer": completion.choices[0].message.content, "headers": raw.headers }
     
 
     def get_chat_history_as_text(self, history, pastMessages) -> list:

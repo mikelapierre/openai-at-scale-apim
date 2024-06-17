@@ -17,6 +17,7 @@ export type SessionConfig = {
 
 export type AskResponse = {
     answer: string | undefined;
+    trace?: string
     error?: string;
 };
 
@@ -38,6 +39,10 @@ export type SessionId = {
     sessionId: string;
 };
 
+export type Tracing = {
+    enabled: boolean;
+}
+
 export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
@@ -46,4 +51,5 @@ export type ChatRequest = {
     userInfo?: UserInfo;
     accessToken?: AccessToken;
     sessionId?: SessionId;
+    tracing?: Tracing;
 };

@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
-import { TextField, Slider } from "@fluentui/react";
+import { TextField, Slider, Checkbox } from "@fluentui/react";
 import { Stack } from "@fluentui/react";
-import { Label } from "@fluentui/react-components";
+import { Button, Label } from "@fluentui/react-components";
 import styles from "./Chat.module.css";
 
 import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn } from "../../api";
@@ -16,14 +16,16 @@ const Chat = () => {
     const [maxResponse, setMaxResponse] = useState<number>(800);
     const [promptSystemTemplate, setPromptSystemTemplate] = useState<string>("");
     const [temperature, setTemperature] = useState<number>(0.5);
-    const [top, setTop] = useState<number>(0.95);
+    const [top, setTop] = useState<number>(0.95);    
 
     //Session settings
-    const [pastMessages, setPastMessages] = useState<number>(10);
+    const [pastMessages, setPastMessages] = useState<number>(0);
     const lastQuestionRef = useRef<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<unknown>();
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
+
+    const [tracingEnabled, setTracingEnabled] = useState<boolean>(false);
 
     //UserInfo
     const app = useAppContext();
@@ -60,6 +62,9 @@ const Chat = () => {
                 },
                 sessionId: {
                     sessionId: app.sessionId?.sessionId || ""
+                },
+                tracing: {
+                    enabled: tracingEnabled || false
                 }
             };
             console.log("request: ", request);
@@ -88,6 +93,7 @@ const Chat = () => {
     const temperatureOnChange = (value: number) => setTemperature(value);
     const topOnChange = (value: number) => setTop(value);
     const pastMessagesOnChange = (value: number) => setPastMessages(value);
+    const tracingOnChange = (e: any, checked: boolean | undefined) => setTracingEnabled(checked ? true : false);
 
     return (
         <div className={styles.container}>
@@ -186,6 +192,15 @@ const Chat = () => {
                             snapToStep
                             defaultValue={pastMessages}
                             onChange={pastMessagesOnChange}
+                        />
+                        <div className={styles.chatSettingsLabel}>
+                            <Label>APIM</Label>
+                        </div>
+                        <Checkbox 
+                            className={styles.chatSettingsSeparator}
+                            label="Enable tracing"
+                            checked={tracingEnabled}
+                            onChange={tracingOnChange}
                         />
                     </div>
                 </Stack.Item>

@@ -103,7 +103,7 @@ function useProvideAppContext() {
                         // Get the user from Microsoft Graph
                         const user = await getUser(authProvider);
                         console.log("user", user);
-                        const avatar = await getProfilePhoto(authProvider);
+                        const avatar = ""; // await getProfilePhoto(authProvider);
                         setUser({
                             displayName: user.displayName || "",
                             email: user.mail || "",

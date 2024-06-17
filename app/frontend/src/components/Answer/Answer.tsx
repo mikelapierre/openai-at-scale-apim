@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Stack, IconButton } from "@fluentui/react";
+import { Stack } from "@fluentui/react";
 import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
@@ -28,6 +28,12 @@ export const Answer = ({ answer }: Props) => {
             </Stack.Item>
             <Stack.Item grow>
                 <div className={styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div>
+                {answer.trace && (
+                    <>
+                        <hr/>
+                        <div className={styles.answerText}>{JSON.stringify(answer.trace, null, 2)}</div>
+                    </>
+                )}
             </Stack.Item>
         </Stack>
     );

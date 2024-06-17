@@ -27,6 +27,9 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
                 username: options.userInfo?.username,
                 email: options.userInfo?.email
             },
+            tracing: {
+                enabled: options.tracing?.enabled
+            }
         })
     });
 
