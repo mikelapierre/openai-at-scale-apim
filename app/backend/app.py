@@ -1,6 +1,5 @@
 import os
 import logging
-import openai
 from flask import Flask, request, jsonify
 from azure.identity import DefaultAzureCredential
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
