@@ -41,7 +41,7 @@ def chat():
         if (request.json["tracing"]["enabled"]):
             accessTokenResult = check_output(["az", "account", "get-access-token"]).decode().strip()
             accessTokenJson = json.loads(accessTokenResult)
-            url = "https://management.azure.com/" + os.getenv("APIM_GW_RESOURCE_ID") + "/listDebugCredentials?api-version=2023-05-01-preview"
+            url = "https://management.azure.com" + os.getenv("APIM_GW_RESOURCE_ID") + "/listDebugCredentials?api-version=2023-05-01-preview"
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + accessTokenJson["accessToken"]
@@ -57,7 +57,7 @@ def chat():
         trace = ""
         if (request.json["tracing"]["enabled"]):
             traceid = r["headers"]["apim-trace-id"]
-            url = "https://management.azure.com/" + os.getenv("APIM_GW_RESOURCE_ID") + "/listTrace?api-version=2023-05-01-preview"
+            url = "https://management.azure.com" + os.getenv("APIM_GW_RESOURCE_ID") + "/listTrace?api-version=2023-05-01-preview"
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + accessTokenJson["accessToken"]
