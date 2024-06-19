@@ -57,7 +57,7 @@ class ChatReadRetrieveReadApproach(Approach):
                                         "previous_message_id":"previous_message_id"}}
         
         #cosmosdb_logging.insert_chat_log(document_definition) # Store prompt log data into Azure Cosmos DB
-        return {"answer": completion.choices[0].message.content, "headers": raw.headers }
+        return {"answer": completion.choices[0].message.content, "completion": str(completion), "headers": raw.headers }
     
 
     def get_chat_history_as_text(self, history, pastMessages) -> list:

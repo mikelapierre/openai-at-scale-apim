@@ -66,7 +66,7 @@ def chat():
                 "traceId": traceid            }
             traceResponse = requests.post(url, headers=headers, json=body)
             trace = traceResponse.json()
-        return jsonify({"answer": r["answer"], "trace": trace })
+        return jsonify({"answer": r["answer"], "completion": r["completion"], "trace": trace })
 
     except Exception as e:
         logging.exception("Exception in /chat")
